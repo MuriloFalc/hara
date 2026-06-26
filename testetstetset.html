@@ -1,0 +1,204 @@
+<section id="ostinato-scroll">
+
+  <canvas id="ostinatoCanvas"></canvas>
+
+  <div class="ostinato-overlay">
+    <h1>OSTINATO</h1>
+    <p>
+      Fidelidade sonora para músicos e profissionais exigentes.
+    </p>
+  </div>
+
+</section>
+
+<style>
+
+#ostinato-scroll{
+  position:relative;
+  height:350vh;
+  width:100%;
+}
+
+#ostinatoCanvas{
+  position:sticky;
+  top:0;
+  width:100%;
+  height:100vh;
+  display:block;
+  background:#000;
+}
+
+.ostinato-overlay{
+  position:absolute;
+  top:50vh;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  color:#fff;
+  z-index:10;
+  width:min(90%,900px);
+}
+
+.ostinato-overlay h1{
+  font-size:clamp(60px,12vw,160px);
+  margin:0;
+  line-height:1;
+}
+
+.ostinato-overlay p{
+  font-size:clamp(16px,2vw,24px);
+}
+
+</style>
+
+<script>
+
+(() => {
+
+const FRAME_COUNT = 90;
+
+const canvas =
+document.getElementById("ostinatoCanvas");
+
+const ctx =
+canvas.getContext("2d");
+
+function resizeCanvas(){
+
+  canvas.width =
+  window.innerWidth;
+
+  canvas.height =
+  window.innerHeight;
+
+}
+
+resizeCanvas();
+
+window.addEventListener(
+"resize",
+resizeCanvas
+);
+
+const frames = [];
+
+function getFrameUrl(index){
+
+  const frame =
+  String(index + 1)
+  .padStart(4,'0');
+
+  return `https://raygmqb1tq9qo8uk.public.blob.vercel-storage.com/framesOst/${frame}`;
+
+}
+
+let loaded = 0;
+
+for(let i=0;i<FRAME_COUNT;i++){
+
+  const img = new Image();
+
+  img.src = getFrameUrl(i);
+
+  img.onload = () => {
+
+    loaded++;
+
+    if(loaded === 1){
+
+      drawFrame(0);
+
+    }
+
+  };
+
+  frames.push(img);
+
+}
+
+function drawFrame(index){
+
+  const img = frames[index];
+
+  if(!img.complete) return;
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  const scale =
+  Math.max(
+    canvas.width / img.width,
+    canvas.height / img.height
+  );
+
+  const x =
+  (canvas.width -
+  img.width * scale) / 2;
+
+  const y =
+  (canvas.height -
+  img.height * scale) / 2;
+
+  ctx.drawImage(
+    img,
+    x,
+    y,
+    img.width * scale,
+    img.height * scale
+  );
+
+}
+
+let ticking = false;
+
+window.addEventListener(
+"scroll",
+() => {
+
+  if(ticking) return;
+
+  ticking = true;
+
+  requestAnimationFrame(() => {
+
+    const section =
+    document.getElementById(
+      "ostinato-scroll"
+    );
+
+    const maxScroll =
+      section.offsetHeight -
+      window.innerHeight;
+
+    const progress =
+      Math.min(
+        Math.max(
+          (window.scrollY -
+          section.offsetTop)
+          / maxScroll,
+          0
+        ),
+        1
+      );
+
+    const frame =
+      Math.floor(
+        progress *
+        (FRAME_COUNT - 1)
+      );
+
+    drawFrame(frame);
+
+    ticking = false;
+
+  });
+
+});
+
+})();
+
+</script>
